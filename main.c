@@ -7,22 +7,23 @@
 #define MAX_SEATS 50
 #define MAX_FILMS 4
 #define MAX_DAYS 2
+#define MAX_STUDIOS 4
 
 // Data film untuk Sabtu
-char *judul_sabtu[] = {"1 Imam 2 Makmum", "Miracle In Cell 2", "Happy Family", "Venom: The Last Dance"};
-float harga_sabtu[] = {44000, 48000, 43000, 50000};
-char *jadwal_sabtu[] = {"13:00", "16:00", "16:30", "17:00"};
+char *judul_sabtu[] = {"1 Imam 2 Makmum", "Miracle In Cell 2", "Venom: The Last Dance", "The Conjuring: Last Rites"};
+float harga_sabtu[] = {42000, 45000, 47000, 50000};
+char *jadwal_sabtu[] = {"13:00", "16:00", "16:30", "19:00"};
 int studio_sabtu[] = {1, 2, 3, 4};
 
 // Data film untuk Minggu
-char *judul_minggu[] = {"Pengantin Setan", "Dirty Angels", "Avatar 2", "Fast X"};
-float harga_minggu[] = {45000, 47000, 55000, 52000};
-char *jadwal_minggu[] = {"14:00", "15:30", "18:00", "19:00"};
+char *judul_minggu[] = {"Flight Risk", "Avatar : Fire & Ash", "Captain America: Brave New World", "Pengantin Setan"};
+float harga_minggu[] = {46000, 52000, 55000, 43000};
+char *jadwal_minggu[] = {"14:00", "15:30", "18:00", "18:30"};
 int studio_minggu[] = {1, 2, 3, 4};
 
-// Array untuk menyimpan status kursi untuk setiap film di setiap hari (0 = kosong, 1 = terisi)
-int kursi_sabtu[MAX_FILMS][ROWS][COLS] = {0};
-int kursi_minggu[MAX_FILMS][ROWS][COLS] = {0};
+// Array untuk menyimpan status kursi untuk setiap studio di setiap hari (0 = kosong, 1 = terisi)
+int kursi_studio_sabtu[MAX_STUDIOS][ROWS][COLS] = {0};
+int kursi_studio_minggu[MAX_STUDIOS][ROWS][COLS] = {0};
 
 // Fungsi untuk menampilkan garis
 void tampilkan_garis() {
@@ -45,7 +46,7 @@ void tampilkanMenu() {
     printf("3. Keluar\n");
 }
 
-void tampilkanFilmPerHari(char *judul, float *harga, char **jadwal, int *studio, int kursi[][ROWS][COLS], const char hari) {
+void tampilkanFilmPerHari(char *judul[], float harga[], char *jadwal[], int studio[], int kursi[][ROWS][COLS], const char* hari) {
     tampilkan_kotak(hari);
     for(int i = 0; i < MAX_FILMS; i++) {
         printf("\nNama Film  : %s", judul[i]);
@@ -53,11 +54,11 @@ void tampilkanFilmPerHari(char *judul, float *harga, char **jadwal, int *studio,
         printf("\nJadwal     : %s WIB", jadwal[i]);
         printf("\nStudio     : %d", studio[i]);
         
-        printf("\n\nDenah Kursi Film %s:", judul[i]);
+        printf("\n\nDenah Kursi Studio %d:", studio[i]);
         printf("\n(0 = Kosong, 1 = Terisi)\n\n");
         for(int row = 0; row < ROWS; row++) {
             for(int col = 0; col < COLS; col++) {
-                printf("%d ", kursi[i][row][col]);
+                printf("%d ", kursi[studio[i]-1][row][col]);
             }
             printf("\n");
         }
@@ -71,22 +72,21 @@ void tampilkanFilm() {
     tampilkan_garis();
     
     // Tampilkan film untuk hari Sabtu
-    tampilkanFilmPerHari(judul_sabtu, harga_sabtu, jadwal_sabtu, studio_sabtu, kursi_sabtu, "SABTU");
+    tampilkanFilmPerHari(judul_sabtu, harga_sabtu, jadwal_sabtu, studio_sabtu, kursi_studio_sabtu, "SABTU");
     
     // Tampilkan film untuk hari Minggu
-    tampilkanFilmPerHari(judul_minggu, harga_minggu, jadwal_minggu, studio_minggu, kursi_minggu, "MINGGU");
+    tampilkanFilmPerHari(judul_minggu, harga_minggu, jadwal_minggu, studio_minggu, kursi_studio_minggu, "MINGGU");
 }
 
-void tampilkanDenah(int film_idx, int hari) {
-    char **judul = (hari == 1) ? judul_sabtu : judul_minggu;
-    int (*kursi)[ROWS][COLS] = (hari == 1) ? kursi_sabtu : kursi_minggu;
+void tampilkanDenah(int studio_idx, int hari) {
+    int (*kursi)[ROWS][COLS] = (hari == 1) ? kursi_studio_sabtu : kursi_studio_minggu;
     
-    printf("\n=== Denah Kursi Film %s ===\n", judul[film_idx]);
+    printf("\n=== Denah Kursi Studio %d ===\n", studio_idx + 1);
     printf("(0 = Kosong, 1 = Terisi)\n\n");
     
     for(int i = 0; i < ROWS; i++) {
         for(int j = 0; j < COLS; j++) {
-            printf("%d ", kursi[film_idx][i][j]);
+            printf("%d ", kursi[studio_idx][i][j]);
         }
         printf("\n");
     }
@@ -117,7 +117,7 @@ void pesanTiket() {
     float *harga = (pilihan_hari == 1) ? harga_sabtu : harga_minggu;
     char **jadwal = (pilihan_hari == 1) ? jadwal_sabtu : jadwal_minggu;
     int *studio = (pilihan_hari == 1) ? studio_sabtu : studio_minggu;
-    int (*kursi)[ROWS][COLS] = (pilihan_hari == 1) ? kursi_sabtu : kursi_minggu;
+    int (*kursi)[ROWS][COLS] = (pilihan_hari == 1) ? kursi_studio_sabtu : kursi_studio_minggu;
     
     // Tampilkan film untuk hari yang dipilih
     for(int i = 0; i < MAX_FILMS; i++) {
@@ -135,7 +135,9 @@ void pesanTiket() {
         return;
     }
     
-    tampilkanDenah(pilihan_film-1, pilihan_hari);
+    int studio_idx = studio[pilihan_film-1] - 1;
+    tampilkanDenah(studio_idx, pilihan_hari);
+    
     printf("\nMasukkan jumlah tiket: ");
     scanf("%d", &jumlah_tiket);
     
@@ -158,21 +160,21 @@ void pesanTiket() {
                 continue;
             }
             
-            if(kursi[pilihan_film-1][baris][kolom] == 1) {
+            if(kursi[studio_idx][baris][kolom] == 1) {
                 printf("Kursi sudah terisi!\n");
                 continue;
             }
             
-            kursi[pilihan_film-1][baris][kolom] = 1;
+            kursi[studio_idx][baris][kolom] = 1;
             break;
         } while(1);
         
-        tampilkanDenah(pilihan_film-1, pilihan_hari);
+        tampilkanDenah(studio_idx, pilihan_hari);
     }
     
     float total = harga[pilihan_film-1] * jumlah_tiket;
     tampilkan_garis();
-    printf("                    TIKET BIOSKOP               \n");
+    printf("                       TIKET BIOSKOP               \n");
     tampilkan_garis();
     printf("Hari: %s\n", pilihan_hari == 1 ? "Sabtu" : "Minggu");
     printf("Nama Film: %s\n", judul[pilihan_film-1]);
@@ -197,8 +199,7 @@ int main() {
     
     do {
         tampilkanMenu();
-        printf("Pilihan Anda: "
-        );
+        printf("Pilihan Anda: ");
         scanf("%d", &pilihan);
         
         switch(pilihan) {
