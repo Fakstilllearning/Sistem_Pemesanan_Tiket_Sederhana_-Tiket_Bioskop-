@@ -5,39 +5,54 @@
 #define ROWS 5
 #define COLS 10
 #define MAX_SEATS 50
-#define MAX_FILMS 6
+#define MAX_FILMS 4
+#define MAX_DAYS 2
 
-// Data film
-char *judul[] = {"1 Imam 2 Makmum", "Miracle In Cell 2", "Happy Family", "Venom: The Last Dance", "Dirty Angels", "Pengantin Setan"};
-float harga[] = {44000, 48000, 43000, 50000, 45000, 47000};
-char *jadwal[] = {"13:00", "16:00", "16:30", "17:00", "19:00", "19:30"};
+// Data film untuk Sabtu
+char *judul_sabtu[] = {"1 Imam 2 Makmum", "Miracle In Cell 2", "Happy Family", "Venom: The Last Dance"};
+float harga_sabtu[] = {44000, 48000, 43000, 50000};
+char *jadwal_sabtu[] = {"13:00", "16:00", "16:30", "17:00"};
+int studio_sabtu[] = {1, 2, 3, 4};
 
-// Array untuk menyimpan status kursi untuk setiap film (0 = kosong, 1 = terisi)
-int kursi[MAX_FILMS][ROWS][COLS] = {0};
+// Data film untuk Minggu
+char *judul_minggu[] = {"Pengantin Setan", "Dirty Angels", "Avatar 2", "Fast X"};
+float harga_minggu[] = {45000, 47000, 55000, 52000};
+char *jadwal_minggu[] = {"14:00", "15:30", "18:00", "19:00"};
+int studio_minggu[] = {1, 2, 3, 4};
 
-// Fungsi-fungsi untuk menu utama
+// Array untuk menyimpan status kursi untuk setiap film di setiap hari (0 = kosong, 1 = terisi)
+int kursi_sabtu[MAX_FILMS][ROWS][COLS] = {0};
+int kursi_minggu[MAX_FILMS][ROWS][COLS] = {0};
+
+// Fungsi untuk menampilkan garis
+void tampilkan_garis() {
+    printf("===========================================================\n");
+}
+
+void tampilkan_kotak(const char* hari) {
+    printf("\n ============                           \n| HARI %s |\n ============\n", hari);
+}
+
 void tampilkanMenu() {
-    printf("\n=============================== Fancynema App ===============================\n");
+    tampilkan_garis();
+    printf("                       Fancynema App                 \n");
+    tampilkan_garis();
     printf("Selamat Datang di Fancynema!\n");
     printf("Pesan Praktis, Nonton Fantastis!\n\n");
-    printf("Nikmati pengalaman memesan tiket bioskop yang cepat, mudah, dan tanpa ribet.\n");
-    printf("Dengan Fancynema App, Anda hanya butuh beberapa klik untuk mendapatkan tiket\n");
-    printf("ke film favorit Anda, kapan saja dan di mana saja. Rasakan kemudahan praktis\n");
-    printf("yang menjadikan momen nonton Anda semakin fantastis!\n\n");
+    printf("Nikmati pengalaman memesan tiket bioskop yang cepat, mudah,\ndan tanpa ribet. Dengan Fancynema App, Anda hanya butuh\nbeberapa klik untuk mendapatkan tiket ke film favorit Anda,\nkapan saja dan di mana saja.\n\n");
     printf("1. Lihat Daftar Film\n");
     printf("2. Pesan Tiket\n");
     printf("3. Keluar\n");
 }
 
-// Menu untuk daftar film
-void tampilkanFilm() {
-    printf("\n=============== DAFTAR FILM ===============\n");
+void tampilkanFilmPerHari(char *judul, float *harga, char **jadwal, int *studio, int kursi[][ROWS][COLS], const char hari) {
+    tampilkan_kotak(hari);
     for(int i = 0; i < MAX_FILMS; i++) {
         printf("\nNama Film  : %s", judul[i]);
         printf("\nHarga      : Rp %.2f", harga[i]);
         printf("\nJadwal     : %s WIB", jadwal[i]);
+        printf("\nStudio     : %d", studio[i]);
         
-        // Tampilan denah kursi untuk setiap film
         printf("\n\nDenah Kursi Film %s:", judul[i]);
         printf("\n(0 = Kosong, 1 = Terisi)\n\n");
         for(int row = 0; row < ROWS; row++) {
@@ -46,11 +61,26 @@ void tampilkanFilm() {
             }
             printf("\n");
         }
-        printf("\n===========================================\n");
+        printf("\n===========================================================\n");
     }
 }
 
-void tampilkanDenah(int film_idx) {
+void tampilkanFilm() {
+    tampilkan_garis();
+    printf("                       DAFTAR FILM                 \n");
+    tampilkan_garis();
+    
+    // Tampilkan film untuk hari Sabtu
+    tampilkanFilmPerHari(judul_sabtu, harga_sabtu, jadwal_sabtu, studio_sabtu, kursi_sabtu, "SABTU");
+    
+    // Tampilkan film untuk hari Minggu
+    tampilkanFilmPerHari(judul_minggu, harga_minggu, jadwal_minggu, studio_minggu, kursi_minggu, "MINGGU");
+}
+
+void tampilkanDenah(int film_idx, int hari) {
+    char **judul = (hari == 1) ? judul_sabtu : judul_minggu;
+    int (*kursi)[ROWS][COLS] = (hari == 1) ? kursi_sabtu : kursi_minggu;
+    
     printf("\n=== Denah Kursi Film %s ===\n", judul[film_idx]);
     printf("(0 = Kosong, 1 = Terisi)\n\n");
     
@@ -62,29 +92,50 @@ void tampilkanDenah(int film_idx) {
     }
 }
 
-// Menu untuk pesan tiket
 void pesanTiket() {
-    int pilihan_film, jumlah_tiket;
+    int pilihan_hari, pilihan_film, jumlah_tiket;
     int nomor_kursi[MAX_SEATS];
     
-    // Tampilan film dan pilih film
-    printf("\n============= PESAN TIKET =============\n");
+    tampilkan_garis();
+    printf("                        PESAN TIKET                \n");
+    tampilkan_garis();
+    
+    // Pilih hari
+    printf("\nPilih Hari:\n");
+    printf("1. Sabtu\n");
+    printf("2. Minggu\n");
+    printf("Pilihan hari (1-2): ");
+    scanf("%d", &pilihan_hari);
+    
+    if(pilihan_hari < 1 || pilihan_hari > 2) {
+        printf("Pilihan hari tidak valid!\n");
+        return;
+    }
+    
+    // Tentukan array yang akan digunakan berdasarkan hari
+    char **judul = (pilihan_hari == 1) ? judul_sabtu : judul_minggu;
+    float *harga = (pilihan_hari == 1) ? harga_sabtu : harga_minggu;
+    char **jadwal = (pilihan_hari == 1) ? jadwal_sabtu : jadwal_minggu;
+    int *studio = (pilihan_hari == 1) ? studio_sabtu : studio_minggu;
+    int (*kursi)[ROWS][COLS] = (pilihan_hari == 1) ? kursi_sabtu : kursi_minggu;
+    
+    // Tampilkan film untuk hari yang dipilih
     for(int i = 0; i < MAX_FILMS; i++) {
         printf("\n%d. Nama Film : %s", i+1, judul[i]);
         printf("\n   Harga     : Rp %.2f", harga[i]);
-        printf("\n   Jadwal    : %s WIB\n", jadwal[i]);
+        printf("\n   Jadwal    : %s WIB", jadwal[i]);
+        printf("\n   Studio    : %d\n", studio[i]);
     }
     
-    printf("\nPilih film (1-6): ");
+    printf("\nPilih film (1-%d): ", MAX_FILMS);
     scanf("%d", &pilihan_film);
     
-    if(pilihan_film < 1 || pilihan_film > 6) {
+    if(pilihan_film < 1 || pilihan_film > MAX_FILMS) {
         printf("Pilihan film tidak valid!\n");
         return;
     }
     
-    // Tampilan denah dan pilih jumlah tiket
-    tampilkanDenah(pilihan_film-1);
+    tampilkanDenah(pilihan_film-1, pilihan_hari);
     printf("\nMasukkan jumlah tiket: ");
     scanf("%d", &jumlah_tiket);
     
@@ -93,7 +144,6 @@ void pesanTiket() {
         return;
     }
     
-    // Pilih kursi
     printf("\nPilih nomor kursi (1-%d): \n", MAX_SEATS);
     for(int i = 0; i < jumlah_tiket; i++) {
         do {
@@ -117,18 +167,20 @@ void pesanTiket() {
             break;
         } while(1);
         
-        tampilkanDenah(pilihan_film-1);
+        tampilkanDenah(pilihan_film-1, pilihan_hari);
     }
     
-    // Cetak tiket bioskop
     float total = harga[pilihan_film-1] * jumlah_tiket;
-    printf("\n========== TIKET BIOSKOP ==========\n");
+    tampilkan_garis();
+    printf("                    TIKET BIOSKOP               \n");
+    tampilkan_garis();
+    printf("Hari: %s\n", pilihan_hari == 1 ? "Sabtu" : "Minggu");
     printf("Nama Film: %s\n", judul[pilihan_film-1]);
     printf("Jadwal: %s WIB\n", jadwal[pilihan_film-1]);
+    printf("Studio: %d\n", studio[pilihan_film-1]);
     printf("Jumlah Tiket: %d\n", jumlah_tiket);
     printf("Nomor Kursi: ");
     
-    // Cetak nomor kursi dengan koma
     for(int i = 0; i < jumlah_tiket; i++) {
         printf("%d", nomor_kursi[i]);
         if(i < jumlah_tiket - 1) {
@@ -137,16 +189,16 @@ void pesanTiket() {
     }
     
     printf("\nTotal: Rp %.2f\n", total);
-    printf("===================================\n");
+    tampilkan_garis();
 }
 
-// Lanjutan untuk fungsi-fungsi menu utama
 int main() {
     int pilihan;
     
     do {
         tampilkanMenu();
-        printf("Pilihan Anda: ");
+        printf("Pilihan Anda: "
+        );
         scanf("%d", &pilihan);
         
         switch(pilihan) {
@@ -164,7 +216,7 @@ int main() {
         }
         
         if(pilihan != 3) {
-            printf("\nTekan Enter untuk melanjutkan...");
+            printf("\nTekan Enter untuk melanjutkan...\n");
             getchar();
             getchar();
         }
