@@ -21,7 +21,7 @@ float harga_minggu[] = {46000, 52000, 55000, 43000};
 char *jadwal_minggu[] = {"14:00", "15:30", "18:00", "18:30"};
 int studio_minggu[] = {1, 2, 3, 4};
 
-// Array untuk menyimpan status kursi untuk setiap studio di setiap hari (0 = kosong, 1 = terisi)
+// Array untuk menyimpan status kursi untuk setiap studio (0 = kosong, 1 = terisi)
 int kursi_studio_sabtu[MAX_STUDIOS][ROWS][COLS] = {0};
 int kursi_studio_minggu[MAX_STUDIOS][ROWS][COLS] = {0};
 
@@ -36,11 +36,11 @@ void tampilkan_kotak(const char* hari) {
 
 void tampilkanMenu() {
     tampilkan_garis();
-    printf("                       Fancynema App                 \n");
+    printf("                       VisionSphere                 \n");
     tampilkan_garis();
-    printf("Selamat Datang di Fancynema!\n");
+    printf("Selamat Datang di VisionSphere!\n");
     printf("Pesan Praktis, Nonton Fantastis!\n\n");
-    printf("Nikmati pengalaman memesan tiket bioskop yang cepat, mudah,\ndan tanpa ribet. Dengan Fancynema App, Anda hanya butuh\nbeberapa klik untuk mendapatkan tiket ke film favorit Anda,\nkapan saja dan di mana saja.\n\n");
+    printf("Nikmati pengalaman menonton film dengan mudah,dan tanpa\nribet. Dengan VisionSphere, Anda hanya butuhbeberapa klik\nuntuk mendapatkan tiket ke film favorit Anda, kapan saja\ndan di mana saja.\n\n");
     printf("1. Lihat Daftar Film\n");
     printf("2. Pesan Tiket\n");
     printf("3. Keluar\n");
@@ -210,7 +210,7 @@ int main() {
                 pesanTiket();
                 break;
             case 3:
-                printf("\nTerima kasih telah menggunakan layanan Fancynema App!\n");
+                printf("\nTerima kasih telah menggunakan layanan VisionSphere!\n");
                 break;
             default:
                 printf("\nPilihan tidak valid!\n");
